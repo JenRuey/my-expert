@@ -19,8 +19,8 @@ export default function AppCamera() {
   if (!permission.granted) {
     // Camera permissions are not granted yet
     return (
-      <View style={styles.container}>
-        <Text style={{ textAlign: "center" }}>We need your permission to show the camera</Text>
+      <View style={[styles.container]}>
+        <Text style={[{ textAlign: "center" }]}>We need your permission to show the camera</Text>
         <Button onPress={requestPermission} title="grant permission" />
       </View>
     );
@@ -49,11 +49,11 @@ export default function AppCamera() {
   };
 
   return (
-    <View style={styles.container}>
-      <Camera style={styles.camera} type={type} ref={_camera}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
-            <Text style={styles.text}>Flip Camera</Text>
+    <View style={[styles.container]}>
+      <Camera style={[styles.camera]} type={type} ref={_camera}>
+        <View style={[styles.buttonContainer]}>
+          <TouchableOpacity style={[styles.button]} onPress={toggleCameraType}>
+            <Text style={[styles.text]}>Flip Camera</Text>
           </TouchableOpacity>
         </View>
       </Camera>
