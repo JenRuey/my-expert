@@ -1,11 +1,20 @@
 import { Camera, CameraType } from "expo-camera";
-import { LegacyRef } from "react";
 import { useRef, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Tesseract from "tesseract.js";
+
+type TextLocType = {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+};
+type TextRespType = {
+  text: string;
+  bounding_box: TextLocType;
+};
 
 export default function AppCamera() {
-  const [text, setText] = useState("");
+  const [text, setText] = useState("Text");
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
 
@@ -32,19 +41,25 @@ export default function AppCamera() {
 
   const takePhoto = async () => {
     if (_camera.current) {
-      const data = await _camera.current.takePictureAsync();
+      const data = await _camera.current.takePictureAsync({ base64: true });
       console.debug(data);
-      let resp = await Tesseract.recognize(
-        // require("../assets/newspaper.jpg"),
-        data.base64,
-        "eng",
-        { logger: (m) => console.log(m) }
-      );
+      if (data.base64) {
+        const blob = await (await fetch(data.base64)).blob();
+        var formData = new FormData();
+        formData.append("image", blob);
 
-      //"eng","chi_sim","chi_tra"
-      let text = resp.data.text;
-      console.log(text);
-      setText(text);
+        let resp = await fetch("https://api.api-ninjas.com/v1/imagetotext", {
+          method: "POST",
+          headers: {
+            "X-Api-Key": "0K2tZCGSMimNDiMjjeoYZg==Eh20QbZod7tqd7zU",
+          },
+          body: formData,
+        });
+        if (resp.ok) {
+          let textArray: Array<TextRespType> = await resp.json();
+          setText(textArray.map((e) => e.text).join(" "));
+        }
+      }
     }
   };
 
@@ -57,7 +72,7 @@ export default function AppCamera() {
           </TouchableOpacity>
         </View>
       </Camera>
-      <div>{text}</div>
+      <Text>{text}</Text>
       <Button onPress={takePhoto} title="Take" />
     </View>
   );
@@ -70,6 +85,7 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+    width: "100%",
   },
   buttonContainer: {
     flex: 1,
